@@ -14,7 +14,7 @@ class LList {
 
 	int size; // size of the list
 
-	void remove(T, LList<T>*); // abstracting
+	void remove(T, LList<T>*); // abstraction
 public:
 	LList(); // empty constructor
 	~LList(); // destructor
@@ -32,22 +32,41 @@ public:
 	T front(); // returns the first element in the list
 	int get_size() const;
 	void print(); // print the whole list
-	
+
 	LList<T> operator+=(const LList<T>& list) {
 		*this = *this + list;
 		return *this;
 	}
+
+	friend LList<T>& operator*(const LList<T>& lhs, const LList<T>& rhs) {
+		LList<T>* new_list = new LList;
+
+		node* iterator = lhs.head;
+		node* iterator_2 = rhs.head;
+		while(iterator || iterator_2) {
+			new_list->push_back((iterator ? iterator->data : 1) * (iterator_2 ? iterator_2->data : 1));
+
+			if(iterator) iterator = iterator->next;
+			if(iterator_2) iterator_2 = iterator_2->next;
+		}
+
+		delete iterator_2;
+		delete iterator;
+
+		return *new_list;
+	}
+
 	friend LList<T>& operator+(const LList<T>& list_1, const LList<T>& list_2) {
 		LList<T>* list = new LList<T>();
 
 		node* iterator = list_1.head;
-		while(iterator) {
+		while (iterator) {
 			list->push_back(iterator->data);
 			iterator = iterator->next;
 		}
 
 		iterator = list_2.head;
-		while(iterator) {
+		while (iterator) {
 			list->push_back(iterator->data);
 			iterator = iterator->next;
 		}
@@ -55,17 +74,19 @@ public:
 		delete iterator;
 		return *list;
 	}
+
 	friend std::ostream& operator<<(std::ostream& os, const LList<T>& list) {
-		if(!list.head) { // check if the list is empty or not
+		if (!list.head) {
+			// check if the list is empty or not
 			std::cerr << "cannot print an empty list" << std::endl;
 			return os;
 		}
 
 		node* iterator = list.head;
-		while(iterator) {
+		while (iterator) {
 			os << iterator->data;
 
-			if(iterator->next) {
+			if (iterator->next) {
 				os << ", ";
 			}
 

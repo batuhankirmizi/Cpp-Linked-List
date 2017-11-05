@@ -224,40 +224,14 @@ int main() {
 	}
 	list->print();
 
-	list->pop_back();
-	list->pop_back();
-	list->pop_back();
-
-	list->print();
-
-	list->pop_front();
-	list->pop_front();
-	list->pop_front();
-
-	list->print();
-
-	list->remove(20);
-
-	list->print();
-
-	list->change(121, 10);
-	list->change(4, 25);
-	list->change(1, 16);
-	list->change(10, 9);
-
-	list->print();
-
-	LList<int>* list_2 = new LList<int>();
-	for (int i = 5; i < 10; ++i) {
-		list_2->push_front(i * i);
+	LList<int>* list_2 = new LList<int>;
+	for (int i = 0; i < 15; ++i) {
+		list_2->push_back((i + 5) * (i + 5));
 	}
-
 	list_2->print();
 
-	LList<int> list_3 = *list + *list_2;
-	list_3.print();
+	LList<int> list_3 = *list * *list_2;
 
-	list_3 += *list;
 	list_3.print();
 
 	delete list;
