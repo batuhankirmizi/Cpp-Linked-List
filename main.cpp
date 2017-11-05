@@ -1,153 +1,270 @@
 #include <iostream>
-#include <string.h>
+#include "main.h"
 
 using namespace std;
 
-struct Car {
-    char* make;
-    int license_number;
-    int owner_id;
-    int price;
-    Car* next;
-};
-
-Car* head = NULL;
-
-void add_car(char* make, int number, int id, int price) {
-    char* nmake = new char[strlen(make) + 1];
-    strcpy(nmake, make);
-
-    Car* ncar = new Car;
-    *ncar = {nmake, number, id, price, NULL};
-
-	// Check for repetitive adding
-	Car* it = head;
-	while(it) {
-		if(strcmp(it->make, make) == 0 && it->license_number == number && it->owner_id == id && it->price == price) {
-			cout << "item: " << make << " already exists. You cannot add the same item" << endl;
-			delete [] nmake;
-			delete ncar;
-			return;
-		}
-		it = it->next;
+template <class T>
+void LList<T>::remove(T data, LList<T>* list) {
+	if(data == head->data) { // in case of demand to removal of the first element
+		pop_front();
+		return;
 	}
 
-    if(!head) {
-        head = ncar;
-        head->next = NULL;
+	node* iterator = head;
+	while(iterator->next && iterator->next->data != data) {
+		iterator = iterator->next;
+	}
 
-        return;
-    }
+	// in case of demand to removal of the last element
+	if(iterator->next == tail) {
+		pop_back();
+		return;
+	}
 
-    Car* iter = head;
-    while(iter->next) {
-        iter = iter->next;
-    }
-
-    iter->next = ncar;
+	node* temp = iterator->next;
+	iterator->next = temp->next;
+	delete temp;
+	size--;
 }
 
-void remove_make(char* make) {
-    if(!head) {
-        cout << "unable to remove element: list is empty" << endl;
-        return;
-    }
+template <class T>
+LList<T>::LList() : head(nullptr), tail(nullptr), size(0) {}
 
-    repetitive:
-    Car* iter = head;
-    if(strcmp(head->make, make) == 0) { // in case of trying to remove the first element
-        head = iter->next;
-        delete [] iter->make;
-        delete iter;
-        cout << make << " removed from the list" << endl;
-        goto repetitive;
-    }
-
-    while(iter->next) {
-        if(strcmp(iter->next->make, make) == 0) {
-            Car* temp = iter->next; // temporary pointer for element to be removed
-            iter->next = temp->next;
-            delete [] temp->make;
-            delete temp;
-            cout << make << " removed from the list" << endl;
-            goto repetitive;
-        }
-        iter = iter->next;
-    }
-
-    cout << "unable to find such a make like: " << make << endl;
+template <class T>
+LList<T>::~LList() {
+	cout << "...list is being destructed..." << endl;
 }
 
-// 
-int& change(char* make, int number, int id) {
-    // If the car with this number exists, it returns reference to price
-    // if there is no such a car -> create a new car and insert to the list but only if the owner has before no more than two cars
-    // return the reference to price of the created car, a default price is 100  
+template <class T>
+bool LList<T>::is_empty() {
+	return head == nullptr; // basically null head means null list
 }
 
-void print() {
-    if(!head) {
-        cout << "unable to print the elements: list is empty" << endl;
-        return;
-    }
+template <class T>
+bool LList<T>::contains(const T data) {
+	if(is_empty()) { // check if the list is empty or not
+		return false;
+	}
 
-    Car* iter = head;
-    while(iter) {
-        cout << iter->make << ", " << iter->license_number << ", " << iter->owner_id << ", " << iter->price;
-        iter = iter->next;
-        cout << "\n";
-    }
+	node* iterator = head;
+	while(iterator) {
+		if(iterator->data == data) {
+			return true;
+		}
 
-    cout << endl;
+		iterator = iterator->next;
+	}
+	return false;
 }
 
+template <class T>
+void LList<T>::remove(T data) {
+	if(is_empty()) { // check if the list is empty
+		cerr << "cannot remove any element from an empty list" << endl;
+		return;
+	}
+
+	if(contains(data)) {
+		node* iterator = head;
+		while(iterator) {
+			if(iterator->data == data) {
+				remove(data, this);
+				return;
+			}
+
+			iterator = iterator->next;
+		}
+	}
+
+	cerr << "cannot find element in the list" << endl;
+}
+
+/**
+ * \brief changes the data with n_data
+ * \param data data to be changed
+ * \param n_data new data
+ */
+template <class T>
+void LList<T>::change(T data, T n_data) {
+	if(is_empty()) { // check if the list is empty or not
+		cerr << "cannot change element, list is empty" << endl;
+		return;
+	}
+
+	if(contains(data)) {
+		node* iterator = head;
+		while(iterator && iterator->data != data) {
+			iterator = iterator->next;
+		}
+		iterator->data = n_data;
+
+		return;
+	}
+
+	cerr << "cannot change element, list does not contain such an element" << endl;
+}
+
+template <class T>
+void LList<T>::push_back(T data) {
+	if(!head) { // if first element is null, add data to the beginning
+		head = new node;
+		head->data = data;
+		head->next = nullptr;
+
+		tail = head;
+
+		size++;
+
+		return;
+	}
+
+	tail->next = new node;
+	tail->next->data = data;
+	tail = tail->next;
+	tail->next = nullptr;
+	size++;
+}
+
+template <class T>
+void LList<T>::push_front(T data) {
+	if(!head) { // check if the head is null
+		head = new node;
+		head->data = data;
+		head->next = nullptr;
+
+		tail = head;
+
+		size++;
+
+		return;
+	}
+
+	// if head is not null, allocate a new memory for the new element
+	node* n_val = new node;
+	n_val->data = data;
+	n_val->next = head;
+
+	head = n_val;
+
+	size++;
+}
+
+template <class T>
+T& LList<T>::pop_back() {
+	if(is_empty()) { // check if the list is empty
+		cerr << "cannot remove any element. list is empty" << endl;
+		T* t = nullptr;
+		return *t;
+	}
+
+	node* iterator = head;
+	while(iterator->next->next) {
+		iterator = iterator->next;
+	}
+
+	T rvalue = iterator->next->data;
+
+	delete iterator->next;
+	iterator->next = nullptr;
+
+	tail = iterator;
+
+	size--;
+	return rvalue;
+}
+
+template <class T>
+T& LList<T>::pop_front() {
+	if(is_empty()) { // check if the list is empty
+		cerr << "cannot remove any element. list is empty" << endl;
+		T* t = nullptr;
+		return *t;
+	}
+
+	T rvalue = head->data;
+
+	node* temp = head;
+	head = head->next;
+	delete temp;
+
+	size--;
+
+	return rvalue;
+}
+
+template <class T>
+void LList<T>::print() {
+	cout << *this;
+}
+
+template <class T>
+T LList<T>::front() {
+	return head->data;
+}
+
+template <class T>
+int LList<T>::get_size() const {
+	return size;
+}
+
+template <class T>
+T LList<T>::back() {
+	return tail->data;
+}
+
+// consists of some test cases
 int main() {
-    print();
+	LList<int>* list = new LList<int>;
+	for(int i = 0; i < 5; ++i) {
+		list->push_front((i + 1) * (i + 1));
+	}
+	list->print();
+	for(int i = 0; i < 5; ++i) {
+		list->push_back((i + 1) * 10);
+	}
+	list->print();
 
-    remove_make("FIAT");
+	list->pop_back();
+	list->pop_back();
+	list->pop_back();
 
-    add_car("FIAT", 0, 0, 10);
-    add_car("FIAT", 0, 0, 10);
-    add_car("VOLVO", 1, 1, 15);
-    add_car("RENAULT", 2, 2, 12);
-    add_car("BMW", 3, 3, 21);
-    add_car("MERCEDES", 4, 4, 35);
-    add_car("FIAT", 0, 0, 10);
-    add_car("PORSCHE", 5, 5, 99);
-    add_car("PORSCHE", 6, 5, 97);
-    add_car("FIAT", 0, 0, 10);
-    add_car("FIAT", 7, 0, 10);
+	list->print();
 
-    print();
+	list->pop_front();
+	list->pop_front();
+	list->pop_front();
 
-    remove_make("FIAT");
+	list->print();
 
-    print();
+	list->remove(20);
 
-    remove_make("BMW");
+	list->print();
 
-    print();
+	list->change(121, 10);
+	list->change(4, 25);
+	list->change(1, 16);
+	list->change(10, 9);
 
-    remove_make("PQR");
+	list->print();
 
-    print();
+	LList<int>* list_2 = new LList<int>();
+	for (int i = 5; i < 10; ++i) {
+		list_2->push_front(i * i);
+	}
 
-    remove_make("PORSCHE");
+	list_2->print();
 
-    print();
+	LList<int> list_3 = *list + *list_2;
+	list_3.print();
 
-	add_car("VOLVO", 7, 1, 58);
+	list_3 += *list;
+	list_3.print();
 
-	print();
+	delete list;
+	delete list_2;
 
-	remove_make("RENAULT");
+	system("pause");
 
-	print();
-
-	remove_make("MERCEDES");
-
-	print();
-
-    return 0;
+	return 0;
 }
 // What was to be demonstrated
