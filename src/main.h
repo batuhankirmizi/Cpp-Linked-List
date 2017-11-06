@@ -22,6 +22,7 @@ public:
 	bool is_empty(); // check if the list is empty or not
 	bool contains(const T); // check if the list contains this element or not
 	void remove(T); // remove element by data
+	void remove_all_elements(); // remove all elements in the list
 	//void remove(int pos); // remove element by position *overloaded*
 	void change(T, T); // change the element data
 	void push_back(T); // adds the data element at the end of list
@@ -36,6 +37,39 @@ public:
 	LList<T> operator+=(const LList<T>& list) {
 		*this = *this + list;
 		return *this;
+	}
+
+	LList<T>& operator=(const LList<T>& list) {
+		if(*this == list) return *this;
+
+		remove_all_elements();
+
+		node* iterator_2 = list.head;
+		while(iterator_2) {
+			push_back(iterator_2->data);
+
+			iterator_2 = iterator_2->next;
+		}
+
+		delete iterator_2;
+
+		return *this;
+	}
+
+	friend bool operator==(const LList<T>& lhs, const LList<T>& rhs) {
+		if(lhs.size != rhs.size) return false;
+
+		node* iterator = lhs.head;
+		node* iterator_2 = rhs.head;
+
+		while(iterator && iterator_2) {
+			if(iterator->data != iterator_2->data) return false;
+
+			iterator = iterator->next;
+			iterator_2 = iterator_2->next;
+		}
+
+		return true;
 	}
 
 	friend LList<T>& operator*(const LList<T>& lhs, const LList<T>& rhs) {

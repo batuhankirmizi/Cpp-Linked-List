@@ -79,6 +79,14 @@ void LList<T>::remove(T data) {
 	cerr << "cannot find element in the list" << endl;
 }
 
+template <class T>
+void LList<T>::remove_all_elements() {
+	const int iter_val = size;
+	for (int i = 0; i < iter_val; ++i) pop_back();
+
+	head = nullptr;
+}
+
 /**
  * \brief changes the data with n_data
  * \param data data to be changed
@@ -157,6 +165,13 @@ T& LList<T>::pop_back() {
 		return *t;
 	}
 
+	if(size == 1) {
+		T rvalue = head->data;
+		head = nullptr;
+		size--;
+		return rvalue;
+	}
+
 	node* iterator = head;
 	while(iterator->next->next) {
 		iterator = iterator->next;
@@ -228,11 +243,23 @@ int main() {
 	for (int i = 0; i < 15; ++i) {
 		list_2->push_back((i + 5) * (i + 5));
 	}
+	cout << "list 2: ";
 	list_2->print();
 
-	LList<int> list_3 = *list * *list_2;
+	LList<int>* list_3 = new LList<int>;
 
-	list_3.print();
+	*list_3 = *list * *list_2;
+
+	cout << "list 3: ";
+	list_3->print();
+
+	*list_3 = *list_2;
+
+	cout << "list 3: ";
+	list_3->print();
+
+	cout << "list_3 equals list_2 ? : " << (*list_3 == *list_2) << endl;
+
 
 	delete list;
 	delete list_2;
