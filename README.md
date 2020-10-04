@@ -1,2 +1,2 @@
 # CPP Linked List
-basic linked list using c++
+Linked List implementation with C++
